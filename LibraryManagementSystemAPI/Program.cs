@@ -1,6 +1,9 @@
 using System.Text;
+using LibraryManagementSystem.Application.Interfaces;
 using LibraryManagementSystem.Domain.Entities;
+using LibraryManagementSystem.Infrastructure.Authentication;
 using LibraryManagementSystem.Infrastructure.Data;
+using LibraryManagementSystem.Infrastructure.Data.Repositories;
 using LibraryManagementSystem.Infrastructure.Helper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -32,7 +35,7 @@ var tokenValidationParameters = new TokenValidationParameters
 
 
 // Configure Identity
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {
     options.Password.RequireDigit = true;
     options.Password.RequiredLength = 8;
@@ -60,6 +63,16 @@ AddJwtBearer(options =>
     options.TokenValidationParameters = tokenValidationParameters;
 });
 
+builder.Services.AddScoped<IBookRepository, BookRepository>();
+builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IBorrowRepository, BorrowRepository>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IJwtService, JwtService>();
+
+
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
@@ -68,7 +81,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

@@ -9,6 +9,7 @@ namespace LibraryManagementSystem.Infrastructure.Helper
         public string Key { get; set; } = string.Empty;
         public string Issuer { get; set; } = string.Empty;
         public string Audience { get; set; } = string.Empty;
-        public double DurationInMinutes { get; set; }
+        public double AccessTokenExpiryMinutes { get; set; }
+        public int RefreshTokenExpiryDays { get; set; }
     }
 }
