@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using LibraryManagementSystem.Application.Interfaces.IRepositories;
 
 namespace LibraryManagementSystem.Application.Interfaces
 {

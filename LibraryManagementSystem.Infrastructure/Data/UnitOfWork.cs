@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using LibraryManagementSystem.Application.Interfaces;
+using LibraryManagementSystem.Application.Interfaces.IRepositories;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace LibraryManagementSystem.Infrastructure.Data

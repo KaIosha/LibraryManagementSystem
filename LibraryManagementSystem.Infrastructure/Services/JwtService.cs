@@ -5,13 +5,14 @@ using System.Security.Claims;
 using System.Text;
 using LibraryManagementSystem.Application.DTOs;
 using LibraryManagementSystem.Application.Interfaces;
+using LibraryManagementSystem.Application.Interfaces.IRepositories;
 using LibraryManagementSystem.Domain.Entities;
 using LibraryManagementSystem.Infrastructure.Helper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace LibraryManagementSystem.Infrastructure.Authentication
+namespace LibraryManagementSystem.Infrastructure.Services
 {
     public class JwtService : IJwtService
     {
@@ -26,8 +27,6 @@ namespace LibraryManagementSystem.Infrastructure.Authentication
             _userManager = userManager;
             _jwt = jwt.Value;
         }
-
-
         public async Task<JwtResponseDto> CreateJwtTokenAsync(ApplicationUser user)
         {
        

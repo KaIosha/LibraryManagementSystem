@@ -1,7 +1,6 @@
-﻿
-using LibraryManagementSystem.Domain.Entities;
+﻿using LibraryManagementSystem.Domain.Entities;
 
-namespace LibraryManagementSystem.Application.Interfaces;
+namespace LibraryManagementSystem.Application.Interfaces.IRepositories;
 
 public interface IBookRepository : IGenericRepository<Book>
 {

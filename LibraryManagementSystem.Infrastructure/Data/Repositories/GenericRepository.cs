@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using LibraryManagementSystem.Application.Interfaces;
+using LibraryManagementSystem.Application.Interfaces.IRepositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibraryManagementSystem.Infrastructure.Data.Repositories

@@ -4,7 +4,7 @@ using System.Text;
 using LibraryManagementSystem.Application.DTOs;
 using LibraryManagementSystem.Domain.Entities;
 
-namespace LibraryManagementSystem.Application.Interfaces
+namespace LibraryManagementSystem.Application.Interfaces.IRepositories
 {
     public interface IJwtService
     {

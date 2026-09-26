@@ -1,10 +1,12 @@
 using System.Text;
 using LibraryManagementSystem.Application.Interfaces;
+using LibraryManagementSystem.Application.Interfaces.IRepositories;
+using LibraryManagementSystem.Application.Interfaces.IServices;
 using LibraryManagementSystem.Domain.Entities;
-using LibraryManagementSystem.Infrastructure.Authentication;
 using LibraryManagementSystem.Infrastructure.Data;
 using LibraryManagementSystem.Infrastructure.Data.Repositories;
 using LibraryManagementSystem.Infrastructure.Helper;
+using LibraryManagementSystem.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -49,6 +51,9 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JWT"));
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EMAIL_CONFIGURATION"));
+
+
 
 
 builder.Services.AddAuthentication(options =>
@@ -63,6 +68,9 @@ AddJwtBearer(options =>
     options.TokenValidationParameters = tokenValidationParameters;
 });
 
+
+builder.Services.AddSingleton(tokenValidationParameters);
+builder.Services.AddTransient<IEmailService, EmailService>(); 
 builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -71,6 +79,7 @@ builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 
 var app = builder.Build();
