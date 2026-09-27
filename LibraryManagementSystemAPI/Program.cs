@@ -1,4 +1,5 @@
 using System.Text;
+using Hangfire;
 using LibraryManagementSystem.Application.Interfaces;
 using LibraryManagementSystem.Application.Interfaces.IRepositories;
 using LibraryManagementSystem.Application.Interfaces.IServices;
@@ -52,7 +53,15 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JWT"));
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EMAIL_CONFIGURATION"));
+builder.Services.AddHangfire(config =>
+{
+    config.UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
 
+
+builder.Services.AddHangfireServer();
 
 
 
@@ -69,7 +78,6 @@ AddJwtBearer(options =>
 });
 
 
-builder.Services.AddSingleton(tokenValidationParameters);
 builder.Services.AddTransient<IEmailService, EmailService>(); 
 builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
@@ -80,9 +88,19 @@ builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    await IdentitySeeder.SeedAsync(scope.ServiceProvider);
+}
+
+app.UseHangfireDashboard("/hangfire");
+
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

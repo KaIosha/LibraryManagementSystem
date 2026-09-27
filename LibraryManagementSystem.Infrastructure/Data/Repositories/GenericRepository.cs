@@ -17,7 +17,7 @@ namespace LibraryManagementSystem.Infrastructure.Data.Repositories
             _dbSet = _dbContext.Set<T>();
         }
 
-        public async Task<T?> GetByIdAsync(int id, CancellationToken ct = default) => await _dbSet.FindAsync(new object[] { id }, ct);
+        public async Task<T?> GetByIdAsync(Guid id, CancellationToken ct = default) => await _dbSet.FindAsync(new object[] { id }, ct);
 
         public async Task<IEnumerable<T>> GetAllAsync(CancellationToken ct = default) => await _dbSet.ToListAsync(ct);
 

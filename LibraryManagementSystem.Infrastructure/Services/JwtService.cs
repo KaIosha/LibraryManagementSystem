@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using LibraryManagementSystem.Application.DTOs;
+using LibraryManagementSystem.Application.DTOs.AuthDtos;
 using LibraryManagementSystem.Application.Interfaces;
 using LibraryManagementSystem.Application.Interfaces.IRepositories;
 using LibraryManagementSystem.Domain.Entities;

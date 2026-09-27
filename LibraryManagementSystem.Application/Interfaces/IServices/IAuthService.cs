@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using LibraryManagementSystem.Application.DTOs;
+using LibraryManagementSystem.Application.DTOs.AuthDtos;
 
 namespace LibraryManagementSystem.Application.Interfaces.IServices
 {

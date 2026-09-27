@@ -1,12 +1,15 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace LibraryManagementSystem.Application.DTOs
+namespace LibraryManagementSystem.Application.DTOs.AuthDtos
 {
-    public class ChangePasswordDto
+    public class ResetPasswordDto
     {
         [Required]
-        [DataType(DataType.Password)]
-        public string CurrentPassword { get; set; } = string.Empty;
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+
+        [Required]
+        public string Code { get; set; } = string.Empty;
 
         [Required]
         [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be at least 8 characters.")]
@@ -16,6 +19,6 @@ namespace LibraryManagementSystem.Application.DTOs
         [Required]
         [DataType(DataType.Password)]
         [Compare(nameof(NewPassword), ErrorMessage = "Passwords do not match.")]
-        public string ConfirmNewPassword { get; set; } = string.Empty;
+        public string ConfirmPassword { get; set; } = string.Empty;
     }
 }
