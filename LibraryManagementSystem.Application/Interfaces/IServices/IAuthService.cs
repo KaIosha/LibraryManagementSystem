@@ -7,8 +7,7 @@ namespace LibraryManagementSystem.Application.Interfaces.IServices
 {
     public interface IAuthService
     {
-        
-        Task<AuthResponseDto> RegisterAsync(RegisterDto dto); // role = member by default
+        Task<AuthResponseDto> RegisterAsync(RegisterDto dto);
         Task<AuthResponseDto> LoginAsync(LoginDto dto);
         Task<AuthResponseDto> ConfirmEmailAsync(ConfirmEmailDto dto);
         Task<AuthResponseDto> ResendConfirmationAsync(string email);

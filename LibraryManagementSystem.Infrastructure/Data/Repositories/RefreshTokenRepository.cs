@@ -15,5 +15,12 @@ namespace LibraryManagementSystem.Infrastructure.Data.Repositories
         {
             return await _dbContext.RefreshTokens.FirstOrDefaultAsync(x => x.Token == token);
         }
+
+        public async Task<IEnumerable<RefreshToken>> GetByUserIdAsync(string userId, CancellationToken ct = default)
+        {
+            return await _dbContext.RefreshTokens
+                .Where(x => x.UserId == userId)
+                .ToListAsync(ct);
+        }
     }
 }

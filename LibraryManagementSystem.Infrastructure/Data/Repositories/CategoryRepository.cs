@@ -13,5 +13,10 @@ namespace LibraryManagementSystem.Infrastructure.Data.Repositories
             var normalizedName = name.Trim().ToLower();
             return await _dbContext.Categories.AnyAsync(x => x.Name.ToLower() == normalizedName);
         }
+
+        public IQueryable<Category> GetQueryable()
+        {
+            return _dbContext.Categories.AsNoTracking();
+        }
     }
 }

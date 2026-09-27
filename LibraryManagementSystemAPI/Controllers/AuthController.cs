@@ -16,25 +16,6 @@ namespace LibraryManagementSystem.API.Controllers
             _authService = authService;
         }
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterDto dto)
-        {
-            var result = await _authService.RegisterAsync(dto);
-
-            if (!result.IsSuccess)
-            {
-                return BadRequest(new { result.IsSuccess, result.Message });
-            }
-
-            return Ok(new
-            {
-                result.IsSuccess,
-                result.Message,
-                result.UserName,
-                result.Email
-            });
-        }
-
         [HttpPost("confirm-email")]
         public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailDto dto)
         {

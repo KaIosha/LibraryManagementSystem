@@ -27,6 +27,19 @@ namespace LibraryManagementSystem.Infrastructure.Data.Repositories
                 .ToDictionaryAsync(x => x.CategoryId, x => x.Count, ct);
         }
 
+        public async Task<bool> ExistsByAuthorAsync(Guid authorId, CancellationToken ct = default)
+        {
+            return await _dbContext.Books.AnyAsync(b => b.AuthorId == authorId, ct);
+        }
+
+        public async Task<Dictionary<Guid, int>> CountGroupedByAuthorAsync(CancellationToken ct = default)
+        {
+            return await _dbContext.Books
+                .GroupBy(b => b.AuthorId)
+                .Select(g => new { AuthorId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.AuthorId, x => x.Count, ct);
+        }
+
         public async Task<(IEnumerable<Book> Items, int TotalCount)> GetPagedByCategoryAsync(Guid categoryId, string? searchTerm, int skip, int take, CancellationToken ct = default)
         {
             var query = _dbContext.Books.Where(b => b.CategoryId == categoryId);
@@ -46,6 +59,11 @@ namespace LibraryManagementSystem.Infrastructure.Data.Repositories
                 .ToListAsync(ct);
 
             return (items, total);
+        }
+
+        public IQueryable<Book> GetQueryable()
+        {
+            return _dbContext.Books.AsNoTracking();
         }
     }
 }

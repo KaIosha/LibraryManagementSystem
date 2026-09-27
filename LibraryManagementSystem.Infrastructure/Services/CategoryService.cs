@@ -3,6 +3,7 @@ using LibraryManagementSystem.Application.DTOs.Common;
 using LibraryManagementSystem.Application.Interfaces;
 using LibraryManagementSystem.Application.Interfaces.IServices;
 using LibraryManagementSystem.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace LibraryManagementSystem.Infrastructure.Services;
 
@@ -178,26 +179,31 @@ public class CategoryService : ICategoryService
     }
     public async Task<PagedResult<CategoryResponseDto>> ViewCategories(BaseQuery query)
     {
-        var allCategories = await _unitOfWork._CategoriesRepo.GetAllAsync();
+        var dbQuery = _unitOfWork._CategoriesRepo.GetQueryable();
+
+        if (!string.IsNullOrWhiteSpace(query.SearchTerm))
+        {
+            var term = query.SearchTerm.Trim();
+            dbQuery = dbQuery.Where(c => c.Name.StartsWith(term));
+        }
+
+        var total = await dbQuery.CountAsync();
+
+        var page = await dbQuery
+            .OrderBy(c => c.Name)
+            .Skip(query.Skip)
+            .Take(query.Take)
+            .ToListAsync();
+
         var counts = await _unitOfWork._BooksRepo.CountGroupedByCategoryAsync();
 
-        var filtered = new List<CategoryResponseDto>();
+        var items = new List<CategoryResponseDto>();
 
-        foreach (var category in allCategories)
+        foreach (var category in page)
         {
-            if (!string.IsNullOrWhiteSpace(query.SearchTerm))
-            {
-                var term = query.SearchTerm.Trim();
-
-                if (!category.Name.StartsWith(term, StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-            }
-
             counts.TryGetValue(category.CategoryId, out var bookCount);
 
-            filtered.Add(new CategoryResponseDto
+            items.Add(new CategoryResponseDto
             {
                 CategoryId = category.CategoryId,
                 Name = category.Name,
@@ -208,12 +214,9 @@ public class CategoryService : ICategoryService
             });
         }
 
-        var total = filtered.Count;
-        var pageItems = filtered.OrderBy(x => x.Name).Skip(query.Skip).Take(query.Take).ToList();
-
         return new PagedResult<CategoryResponseDto>
         {
-            Items = pageItems,
+            Items = items,
             TotalCount = total,
             PageNumber = query.PageNumber,
             PageSize = query.PageSize
