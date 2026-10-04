@@ -32,7 +32,8 @@ public class CategoryService : ICategoryService
         {
             CategoryId = Guid.NewGuid(),
             Name = dto.Name.Trim(),
-            Description = dto.Description?.Trim()
+            Description = dto.Description?.Trim(),
+            IsDeleted = false
         };
 
         await _unitOfWork._CategoriesRepo.AddAsync(category);
@@ -61,7 +62,7 @@ public class CategoryService : ICategoryService
     public async Task<CategoryResponseDto> UpdateCategory(UpdateCategoryDto dto)
     {
         var category = await _unitOfWork._CategoriesRepo.GetByIdAsync(dto.CategoryId);
-        if (category is null)
+        if (category is null || category.IsDeleted)
         {
             return new CategoryResponseDto
             {
@@ -124,24 +125,26 @@ public class CategoryService : ICategoryService
             };
         }
 
-        var booksExist = await _unitOfWork._BooksRepo.ExistsByCategoryAsync(categoryId);
-
-        if (booksExist)
+        if (category.IsDeleted)
         {
             return new CategoryResponseDto
             {
                 IsSuccess = false,
-                Message = "Cannot delete category, it has books."
+                Message = "Category is already deleted."
             };
         }
 
-        _unitOfWork._CategoriesRepo.Delete(category);
+        // Soft-delete: keep row + book history. Books stay linked;
+        // BookService blocks new books for deleted categories.
+        category.IsDeleted = true;
+
+        _unitOfWork._CategoriesRepo.Update(category);
         await _unitOfWork.SaveChangesAsync();
 
         return new CategoryResponseDto
         {
             IsSuccess = true,
-            Message = "Category deleted successfully.",
+            Message = "Category deleted successfully (soft-deleted).",
             CategoryId = category.CategoryId,
             Name = category.Name
         };
@@ -150,7 +153,7 @@ public class CategoryService : ICategoryService
     {
         var category = await _unitOfWork._CategoriesRepo.GetByIdAsync(categoryId);
 
-        if (category is null)
+        if (category is null || category.IsDeleted)
         {
             return new PagedResult<BookDataDto>
             {
@@ -179,12 +182,12 @@ public class CategoryService : ICategoryService
     }
     public async Task<PagedResult<CategoryResponseDto>> ViewCategories(BaseQuery query)
     {
-        var dbQuery = _unitOfWork._CategoriesRepo.GetQueryable();
+        var dbQuery = _unitOfWork._CategoriesRepo.GetQueryable().Where(c => !c.IsDeleted);
 
         if (!string.IsNullOrWhiteSpace(query.SearchTerm))
         {
             var term = query.SearchTerm.Trim();
-            dbQuery = dbQuery.Where(c => c.Name.StartsWith(term));
+            dbQuery = dbQuery.Where(c => c.Name.Contains(term));
         }
 
         var total = await dbQuery.CountAsync();

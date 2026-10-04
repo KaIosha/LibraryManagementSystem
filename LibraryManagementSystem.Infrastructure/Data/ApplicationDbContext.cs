@@ -54,8 +54,28 @@ namespace LibraryManagementSystem.Infrastructure.Data
             builder.Entity<Payment>()
                 .Property(x => x.Amount).HasPrecision(18, 2);
 
+            builder.Entity<Borrow>()
+                .Property(x => x.TotalAmount).HasPrecision(18, 2);
+
+            builder.Entity<Borrow>()
+                .Property(x => x.LateFee).HasPrecision(18, 2);
+
             builder.Entity<Book>()
                 .HasIndex(x => x.ISBN).IsUnique();
+
+            // Concurrency guard: at most one active borrow per book.
+            // Borrowed = 0, Overdue = 2 (see BorrowStatus).
+            builder.Entity<Borrow>()
+                .HasIndex(b => b.BookId)
+                .IsUnique()
+                .HasDatabaseName("UX_Borrows_ActiveBook")
+                .HasFilter("[Status] IN (0, 2)");
+
+            // NOTE: no global query filter for Book.IsDeleted on purpose.
+            // Borrow history must still join deleted books, so book catalog
+            // queries filter !IsDeleted explicitly (see BookService/BookRepository).
+            // IsDeleted = source of truth for delete; Availability = false
+            // alone means borrowed OR deleted.
 
             //seed Roles in db
             SeedIdentityRoles(builder);

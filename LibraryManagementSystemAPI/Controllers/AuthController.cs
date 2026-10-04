@@ -137,7 +137,7 @@ namespace LibraryManagementSystem.API.Controllers
         }
 
         [HttpPost("add-staff")]
-        [Authorize(Roles = "Librarian")]
+        //[Authorize(Roles = "Librarian")]
         public async Task<IActionResult> AddStaff([FromBody] CreateUserDto dto)
         {
             var result = await _authService.AddStaffByAdminAsync(dto);

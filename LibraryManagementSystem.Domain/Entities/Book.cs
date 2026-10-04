@@ -10,6 +10,7 @@ namespace LibraryManagementSystem.Domain.Entities
         public string Genre { get; set; } = string.Empty;
         public string Language { get; set; } = string.Empty;
         public bool Availability { get; set; } = true;
+        public bool IsDeleted { get; set; } = false;
 
         
         public Guid AuthorId { get; set; }

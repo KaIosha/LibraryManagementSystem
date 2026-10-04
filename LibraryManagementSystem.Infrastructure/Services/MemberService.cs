@@ -45,6 +45,15 @@ public class MemberService : IMemberService
             };
         }
 
+        if (!user.IsActive)
+        {
+            return new MemberResponseDto
+            {
+                IsSuccess = false,
+                Message = "Member is deactivated."
+            };
+        }
+
         var userName = dto.UserName.Trim();
 
         var nameTaken = await _userManager.FindByNameAsync(userName);
@@ -124,6 +133,15 @@ public class MemberService : IMemberService
             };
         }
 
+        if (!user.IsActive)
+        {
+            return new MemberResponseDto
+            {
+                IsSuccess = false,
+                Message = "Member is already deactivated."
+            };
+        }
+
         var borrows = await _unitOfWork._BorrowsRepo.GetByMemberIdAsync(memberId);
 
         foreach (var borrow in borrows)
@@ -138,15 +156,9 @@ public class MemberService : IMemberService
             }
         }
 
-        if (borrows.Any())
-        {
-            return new MemberResponseDto
-            {
-                IsSuccess = false,
-                Message = "Cannot delete member with borrowing history."
-            };
-        }
-
+        // Soft-delete via IsActive = false: borrowing history is kept,
+        // login/borrow blocked by IsActive checks in AuthService/BorrowService.
+        // Revoke refresh tokens so existing sessions stop refreshing.
         var tokens = await _unitOfWork._RefreshTokenRepo.GetByUserIdAsync(memberId);
 
         foreach (var token in tokens)
@@ -156,7 +168,8 @@ public class MemberService : IMemberService
 
         await _unitOfWork.SaveChangesAsync();
 
-        var result = await _userManager.DeleteAsync(user);
+        user.IsActive = false;
+        var result = await _userManager.UpdateAsync(user);
 
         if (!result.Succeeded)
         {
@@ -170,7 +183,66 @@ public class MemberService : IMemberService
         return new MemberResponseDto
         {
             IsSuccess = true,
-            Message = "Member deleted successfully."
+            Message = "Member deleted successfully (deactivated, history kept)."
+        };
+    }
+
+    public async Task<MemberResponseDto> ReactivateMemberAsync(string memberId)
+    {
+        var user = await _userManager.FindByIdAsync(memberId);
+
+        if (user is null)
+        {
+            return new MemberResponseDto
+            {
+                IsSuccess = false,
+                Message = "Member not found."
+            };
+        }
+
+        var isMember = await _userManager.IsInRoleAsync(user, SeedRoles.Member.Name!);
+
+        if (!isMember)
+        {
+            return new MemberResponseDto
+            {
+                IsSuccess = false,
+                Message = "This account is not a member."
+            };
+        }
+
+        if (user.IsActive)
+        {
+            return new MemberResponseDto
+            {
+                IsSuccess = false,
+                Message = "Member is already active."
+            };
+        }
+
+        user.IsActive = true;
+        var result = await _userManager.UpdateAsync(user);
+
+        if (!result.Succeeded)
+        {
+            return new MemberResponseDto
+            {
+                IsSuccess = false,
+                Message = $"Reactivate failed: {string.Join(", ", result.Errors.Select(e => e.Description))}"
+            };
+        }
+
+        return new MemberResponseDto
+        {
+            Id = user.Id,
+            Name = user.Name,
+            UserName = user.UserName ?? string.Empty,
+            Email = user.Email ?? string.Empty,
+            PhoneNumber = user.PhoneNumber,
+            IsActive = user.IsActive,
+            EmailConfirmed = user.EmailConfirmed,
+            IsSuccess = true,
+            Message = "Member reactivated successfully."
         };
     }
 
@@ -195,6 +267,15 @@ public class MemberService : IMemberService
             {
                 IsSuccess = false,
                 Message = "This account is not a member."
+            };
+        }
+
+        if (!user.IsActive)
+        {
+            return new MemberResponseDto
+            {
+                IsSuccess = false,
+                Message = "Member not found."
             };
         }
 
@@ -282,8 +363,8 @@ public class MemberService : IMemberService
             {
                 var term = query.SearchTerm.Trim();
 
-                if (!title.StartsWith(term, StringComparison.OrdinalIgnoreCase) &&
-                    !isbn.StartsWith(term, StringComparison.OrdinalIgnoreCase))
+                if (!title.Contains(term, StringComparison.OrdinalIgnoreCase) &&
+                    !isbn.Contains(term, StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }

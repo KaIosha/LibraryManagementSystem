@@ -19,7 +19,6 @@ public class AuthorService : IAuthorService
 
     public async Task<AuthorResponseDto> CreateAuthor(CreateAuthorDto dto)
     {
-        
         var nameExist = await _unitOfWork._AuthorsRepo.ExistsByNameAsync(dto.Name);
 
         if (nameExist)
@@ -45,9 +44,10 @@ public class AuthorService : IAuthorService
         var author = new Author
         {
             AuthorId = Guid.NewGuid(),
-            Name = dto.Name,
+            Name = dto.Name.Trim(),
             Email = dto.Email.Trim(),
-            Nationality = dto.Nationality?.ToLower().Trim()
+            Nationality = dto.Nationality?.ToLower().Trim() ?? string.Empty,
+            IsDeleted = false
         };
 
         await _unitOfWork._AuthorsRepo.AddAsync(author);
@@ -77,7 +77,7 @@ public class AuthorService : IAuthorService
     {
         var author = await _unitOfWork._AuthorsRepo.GetByIdAsync(dto.AuthorId);
 
-        if (author is null)
+        if (author is null || author.IsDeleted)
         {
             return new AuthorResponseDto
             {
@@ -98,7 +98,21 @@ public class AuthorService : IAuthorService
             };
         }
 
-        author.Name = dto.Name ?? author.Name;
+        var newName = (dto.Name ?? author.Name).Trim();
+        if (!author.Name.Equals(newName, StringComparison.OrdinalIgnoreCase))
+        {
+            var nameTaken = await _unitOfWork._AuthorsRepo.ExistsByNameAsync(newName);
+            if (nameTaken)
+            {
+                return new AuthorResponseDto
+                {
+                    IsSuccess = false,
+                    Message = "This name already exists."
+                };
+            }
+        }
+
+        author.Name = newName;
         author.Email = email;
         author.Nationality = dto.Nationality?.ToLower().Trim() ?? author.Nationality;
 
@@ -129,35 +143,38 @@ public class AuthorService : IAuthorService
             };
         }
 
-        var booksExist = await _unitOfWork._BooksRepo.ExistsByAuthorAsync(authorId);
-        if (booksExist)
+        if (author.IsDeleted)
         {
             return new AuthorResponseDto
             {
                 IsSuccess = false,
-                Message = "Cannot delete author, he has books."
+                Message = "Author is already deleted."
             };
         }
 
-        _unitOfWork._AuthorsRepo.Delete(author);
+        // Soft-delete: keep row + book history. Books stay linked;
+        // BookService blocks new books for deleted authors.
+        author.IsDeleted = true;
+
+        _unitOfWork._AuthorsRepo.Update(author);
         await _unitOfWork.SaveChangesAsync();
 
         return new AuthorResponseDto
         {
             IsSuccess = true,
-            Message = "Author deleted successfully.",
+            Message = "Author deleted successfully (soft-deleted).",
             AuthorId = author.AuthorId,
             Name = author.Name
         };
     }
     public async Task<PagedResult<AuthorResponseDto>> ViewAuthors(BaseQuery query)
     {
-        var dbQuery = _unitOfWork._AuthorsRepo.GetQueryable();
+        var dbQuery = _unitOfWork._AuthorsRepo.GetQueryable().Where(a => !a.IsDeleted);
 
         if (!string.IsNullOrWhiteSpace(query.SearchTerm))
         {
             var term = query.SearchTerm.Trim();
-            dbQuery = dbQuery.Where(a => a.Name.StartsWith(term));
+            dbQuery = dbQuery.Where(a => a.Name.Contains(term));
         }
 
         var total = await dbQuery.CountAsync();
@@ -200,7 +217,7 @@ public class AuthorService : IAuthorService
     {
         var author = await _unitOfWork._AuthorsRepo.GetByIdAsync(authorId);
 
-        if (author is null)
+        if (author is null || author.IsDeleted)
         {
             return new AuthorResponseDto
             {
@@ -227,7 +244,7 @@ public class AuthorService : IAuthorService
     {
         var author = await _unitOfWork._AuthorsRepo.GetByIdAsync(authorId);
 
-        if (author is null)
+        if (author is null || author.IsDeleted)
         {
             return new PagedResult<BookDataDto>
             {
@@ -238,15 +255,15 @@ public class AuthorService : IAuthorService
             };
         }
 
-        var booksQuery = _unitOfWork._BooksRepo.GetQueryable().Where(b => b.AuthorId == authorId);
+        var booksQuery = _unitOfWork._BooksRepo.GetQueryable().Where(b => b.AuthorId == authorId && !b.IsDeleted);
 
         if (!string.IsNullOrWhiteSpace(query.SearchTerm))
         {
             var term = query.SearchTerm.Trim();
 
             booksQuery = booksQuery.Where(b =>
-                b.Title.StartsWith(term) ||
-                b.ISBN.StartsWith(term));
+                b.Title.Contains(term) ||
+                b.ISBN.Contains(term));
         }
 
         var total = await booksQuery.CountAsync();
@@ -272,6 +289,4 @@ public class AuthorService : IAuthorService
             PageSize = query.PageSize
         };
     }
-
- 
 }

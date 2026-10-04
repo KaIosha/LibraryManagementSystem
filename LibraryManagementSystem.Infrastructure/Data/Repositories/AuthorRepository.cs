@@ -10,13 +10,13 @@ namespace LibraryManagementSystem.Infrastructure.Data.Repositories
 
         public async Task<bool> ExistsByEmailAsync(string email)
         {
-            return await _dbContext.Authors.AnyAsync(a => a.Email == email);
+            return await _dbContext.Authors.AnyAsync(a => !a.IsDeleted && a.Email == email);
         }
 
         public async Task<bool> ExistsByNameAsync(string name)
         {
             var normalized = name.Trim().ToLower();
-            return await _dbContext.Authors.AnyAsync(a => a.Name.ToLower() == normalized);
+            return await _dbContext.Authors.AnyAsync(a => !a.IsDeleted && a.Name.ToLower() == normalized);
         }
 
         public IQueryable<Author> GetQueryable()

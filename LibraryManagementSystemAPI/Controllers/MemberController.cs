@@ -53,11 +53,25 @@ namespace LibraryManagementSystem.API.Controllers
             return BadRequest(result);
         }
 
-        [Authorize(Roles = "Librarian,Staff")]
+        //[Authorize(Roles = "Librarian")]
         [HttpDelete("{memberId}")]
         public async Task<IActionResult> DeleteMember([FromRoute] string memberId)
         {
             var result = await _memberService.DeleteMemberAsync(memberId);
+
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+
+            return BadRequest(result);
+        }
+
+        //[Authorize(Roles = "Librarian")]
+        [HttpPost("{memberId}/reactivate")]
+        public async Task<IActionResult> ReactivateMember([FromRoute] string memberId)
+        {
+            var result = await _memberService.ReactivateMemberAsync(memberId);
 
             if (result.IsSuccess)
             {

@@ -58,7 +58,7 @@ namespace LibraryManagementSystem.API.Controllers
 
             return BadRequest(result);
         }
-
+        //[Authorize]
         [HttpGet]
         public async Task<IActionResult> ViewAuthors([FromQuery] BaseQuery query)
         {

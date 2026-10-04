@@ -17,7 +17,7 @@ namespace LibraryManagementSystem.API.Controllers
             _categoryService = categoryService;
         }
 
-        [Authorize(Roles = "Librarian,Staff")]
+        //[Authorize(Roles = "Librarian,Staff")]
         [HttpPost("create")]
         public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryDto dto)
         {
@@ -29,7 +29,7 @@ namespace LibraryManagementSystem.API.Controllers
             return BadRequest(result);
         }
 
-        [Authorize(Roles = "Librarian,Staff")]
+        //[Authorize(Roles = "Librarian,Staff")]
         [HttpPut("update")]
         public async Task<IActionResult> UpdateCategory([FromBody] UpdateCategoryDto dto)
         {
@@ -41,7 +41,7 @@ namespace LibraryManagementSystem.API.Controllers
             return BadRequest(result);
         }
 
-        [Authorize(Roles = "Librarian,Staff")]
+        //[Authorize(Roles = "Librarian,Staff")]
         [HttpDelete("{categoryId:guid}")]
         public async Task<IActionResult> DeleteCategory([FromRoute] Guid categoryId)
         {

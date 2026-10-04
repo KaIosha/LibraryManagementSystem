@@ -16,5 +16,6 @@ public interface IBookRepository : IGenericRepository<Book>
 
     Task<(IEnumerable<Book> Items, int TotalCount)> GetPagedByCategoryAsync(Guid categoryId, string? searchTerm, int skip, int take, CancellationToken ct = default);
 
+    Task<Book?> IsAvailable(Guid bookId);
     IQueryable<Book> GetQueryable();
 }

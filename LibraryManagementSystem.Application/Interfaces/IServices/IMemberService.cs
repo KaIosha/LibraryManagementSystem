@@ -9,6 +9,8 @@ public interface IMemberService
     Task<MemberResponseDto> UpdateMemberAsync(string memberId, UpdateMemberDto dto);
     //• Delete members
     Task<MemberResponseDto> DeleteMemberAsync(string memberId);
+    //• Reactivate a deactivated member (Admin only)
+    Task<MemberResponseDto> ReactivateMemberAsync(string memberId);
     //• View member profile
     Task<MemberResponseDto> GetMemberProfileAsync(string memberId);
     //• List all borrowed books for a member

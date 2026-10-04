@@ -15,16 +15,18 @@ public class AuthService : IAuthService
     private readonly IJwtService _jwtService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IBackgroundJobClient _backgroundJob;
-
+    private readonly IEmailService _emailService;
     public AuthService(UserManager<ApplicationUser> userManager,
         IJwtService jwtService, 
         IUnitOfWork unitOfWork,
-        IBackgroundJobClient backgroundJob)
+        IBackgroundJobClient backgroundJob,
+        IEmailService emailService)
     {
         this._userManager = userManager;
         this._jwtService = jwtService;
         this._unitOfWork = unitOfWork;
         this._backgroundJob = backgroundJob;
+        this._emailService = emailService;
     }
 
     public async Task<AuthResponseDto> RegisterAsync(RegisterDto dto)
@@ -92,7 +94,7 @@ public class AuthService : IAuthService
         }
 
         user.EmailConfirmationCode = RandomNumberGenerator.GetInt32(100_000, 1_000_000).ToString();
-        user.EmailConfirmationCodeExpiresAt = DateTime.UtcNow.AddMinutes(3);
+        user.EmailConfirmationCodeExpiresAt = DateTime.UtcNow.AddMinutes(10);
 
         var updateResult = await _userManager.UpdateAsync(user);
 
@@ -106,7 +108,7 @@ public class AuthService : IAuthService
 
         var emailBody = WriteRegistrationEmailBody(user);
 
-        //await _emailService.SendAsync(user.Email, "Library - Verify your email", emailBody);
+        // await _emailService.SendAsync(user.Email, "Library - Verify your email", emailBody);
         _backgroundJob.Enqueue<IEmailService>(x => x.SendAsync(user.Email, "Library - Verify your email", emailBody));
 
         return new AuthResponseDto
@@ -367,22 +369,13 @@ public class AuthService : IAuthService
             };
         }
 
-        var removePasswordResult = await _userManager.RemovePasswordAsync(user);
+        
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var resetResult = await _userManager.ResetPasswordAsync(user, token, dto.NewPassword);
 
-        if (!removePasswordResult.Succeeded)
+        if (!resetResult.Succeeded)
         {
-            return new AuthResponseDto
-            {
-                IsSuccess = false,
-                Message = "Failed to reset password."
-            };
-        }
-
-        var addPasswordResult = await _userManager.AddPasswordAsync(user, dto.NewPassword);
-
-        if (!addPasswordResult.Succeeded)
-        {
-            return new AuthResponseDto { IsSuccess = false, Message = $"Failed to reset password: {string.Join(", ", addPasswordResult.Errors.Select(e => e.Description))}" };
+            return new AuthResponseDto { IsSuccess = false, Message = $"Failed to reset password: {string.Join(", ", resetResult.Errors.Select(e => e.Description))}" };
         }
 
         user.PasswordResetCode = null;
@@ -696,7 +689,7 @@ public class AuthService : IAuthService
                 line-height: 1.6;
                 color: #64748b;
             ">
-                This code will expire in <strong>3 minutes</strong>.
+                This code will expire in <strong>10 minutes</strong>.
                 If you didn't create this account, you can safely ignore this email.
             </p>
 

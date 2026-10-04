@@ -6,6 +6,7 @@ namespace LibraryManagementSystem.Domain.Entities
         public string Name { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Nationality { get; set; } = string.Empty;
+        public bool IsDeleted { get; set; } = false;
 
         public ICollection<Book> Books { get; set; } = new List<Book>();
     }

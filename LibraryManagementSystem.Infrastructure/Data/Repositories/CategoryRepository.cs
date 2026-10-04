@@ -11,7 +11,7 @@ namespace LibraryManagementSystem.Infrastructure.Data.Repositories
         public async Task<bool> ExistsByNameAsync(string name)
         {
             var normalizedName = name.Trim().ToLower();
-            return await _dbContext.Categories.AnyAsync(x => x.Name.ToLower() == normalizedName);
+            return await _dbContext.Categories.AnyAsync(x => !x.IsDeleted && x.Name.ToLower() == normalizedName);
         }
 
         public IQueryable<Category> GetQueryable()

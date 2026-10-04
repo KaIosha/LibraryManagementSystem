@@ -14,5 +14,7 @@ namespace LibraryManagementSystem.Domain.Entities
         public DateTime PaymentDate { get; set; } = DateTime.UtcNow;
         public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
         public string? Notes { get; set; } = string.Empty;
+        public string? StripeSessionId { get; set; }
+        public string? StripePaymentIntentId { get; set; }
     }
 }

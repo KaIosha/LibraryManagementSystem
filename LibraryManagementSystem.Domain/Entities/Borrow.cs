@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using LibraryManagementSystem.Domain.Enums;
 
 namespace LibraryManagementSystem.Domain.Entities
@@ -15,6 +16,8 @@ namespace LibraryManagementSystem.Domain.Entities
         public DateTime BorrowDate { get; set; } = DateTime.UtcNow;
         public DateTime DueDate { get; set; }
         public DateTime? ReturnDate { get; set; }
+        public decimal TotalAmount { get; set; }
+        public decimal LateFee { get; set; }
 
         public BorrowStatus Status { get; set; } = BorrowStatus.Borrowed;
 
