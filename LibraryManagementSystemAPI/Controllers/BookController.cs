@@ -16,7 +16,7 @@ namespace LibraryManagementSystem.API.Controllers
             this._bookService = bookService;
         }
 
-        //[Authorize(Roles = "Librarian,Staff")]
+        [Authorize(Roles = "Librarian,Staff")]
         [HttpPost("create")]
         public async Task<IActionResult> AddNewBook([FromBody] AddBookDto dto)
         {
@@ -28,7 +28,7 @@ namespace LibraryManagementSystem.API.Controllers
             return Ok(result);
         }
 
-        //[Authorize(Roles = "Librarian,Staff")]
+        [Authorize(Roles = "Librarian,Staff")]
         [HttpPut("update")]
         public async Task<IActionResult> UpdateBook([FromBody] UpdateBookDto dto)
         {
@@ -42,7 +42,7 @@ namespace LibraryManagementSystem.API.Controllers
             return BadRequest(result);
         }
 
-        //[Authorize(Roles = "Librarian,Staff")]
+        [Authorize(Roles = "Librarian,Staff")]
         [HttpDelete("{bookId:guid}")]
         public async Task<IActionResult> DeleteBook([FromRoute] Guid bookId)
         {
