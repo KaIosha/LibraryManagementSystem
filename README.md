@@ -89,8 +89,6 @@ URLs (see `Properties/launchSettings.json`):
 - Payments: cash (immediate `Paid`) and Stripe Checkout (`Pending` then `Paid` after success redirect verification), payment history per borrow
 - Auth: register + email confirm code, login, refresh rotation, logout (single token), forgot/reset password, add staff (Librarian only)
 
-A ready Postman list lives in `testEnpoint.txt` (endpoint order + sample bodies).
-
 ## Testing payments with Stripe
 
 1. Borrow a book, copy `borrowId`.
@@ -103,4 +101,4 @@ A ready Postman list lives in `testEnpoint.txt` (endpoint order + sample bodies)
 
 - Success verification is redirect-based (`GET /payment/success`), not a Stripe webhook. Good enough for local testing; a webhook with signature verification is the production follow-up.
 - Logout revokes the one refresh token sent (single device). Access tokens stay valid until expiry, which is standard for stateless JWT.
-- Most `[Authorize]` attributes on catalog/borrow controllers are commented out for local testing. Enable them before any shared deployment.
+- Catalog, borrow, and member endpoints are protected with role-based `[Authorize]` (Librarian/Staff/Member as noted in Roles). Auth endpoints (register, confirm-email, login, refresh, forgot/reset password) are public by design.
