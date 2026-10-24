@@ -39,7 +39,7 @@ namespace LibraryManagementSystem.API.Controllers
             });
         }
 
-        //[Authorize(Roles = "Librarian,Staff")]
+        [Authorize(Roles = "Librarian,Staff")]
         [HttpPut("{memberId}")]
         public async Task<IActionResult> UpdateMember([FromRoute] string memberId, [FromBody] UpdateMemberDto dto)
         {
@@ -53,7 +53,7 @@ namespace LibraryManagementSystem.API.Controllers
             return BadRequest(result);
         }
 
-        //[Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Librarian")]
         [HttpDelete("{memberId}")]
         public async Task<IActionResult> DeleteMember([FromRoute] string memberId)
         {
@@ -67,7 +67,7 @@ namespace LibraryManagementSystem.API.Controllers
             return BadRequest(result);
         }
 
-        //[Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Librarian")]
         [HttpPost("{memberId}/reactivate")]
         public async Task<IActionResult> ReactivateMember([FromRoute] string memberId)
         {
@@ -81,7 +81,7 @@ namespace LibraryManagementSystem.API.Controllers
             return BadRequest(result);
         }
 
-       //[Authorize]
+        [Authorize]
         [HttpGet("{memberId}")]
         public async Task<IActionResult> ViewMemberProfile([FromRoute] string memberId)
         {
@@ -95,7 +95,7 @@ namespace LibraryManagementSystem.API.Controllers
             return NotFound(result);
         }
 
-        //[Authorize]
+        [Authorize]
         [HttpGet("{memberId}/borrows")]
         public async Task<IActionResult> ListMemberBorrows([FromRoute] string memberId, [FromQuery] BaseQuery query)
         {

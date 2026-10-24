@@ -32,16 +32,6 @@ public class AuthService : IAuthService
     public async Task<AuthResponseDto> RegisterAsync(RegisterDto dto)
     {
 
-        //var validationResult = await _registerValidator.ValidateAsync(dto);
-        //if (!validationResult.IsValid)
-        //{
-        //    return new AuthResponseDto
-        //    {
-        //        IsAuthenticated = false,
-        //        Message = "Validation failed: " + string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage))
-        //    };
-        //}
-
         var existingUser = await _userManager.FindByEmailAsync(dto.Email);
 
         if (existingUser is not null)
@@ -108,7 +98,6 @@ public class AuthService : IAuthService
 
         var emailBody = WriteRegistrationEmailBody(user);
 
-        // await _emailService.SendAsync(user.Email, "Library - Verify your email", emailBody);
         _backgroundJob.Enqueue<IEmailService>(x => x.SendAsync(user.Email, "Library - Verify your email", emailBody));
 
         return new AuthResponseDto
@@ -223,7 +212,6 @@ public class AuthService : IAuthService
 
         var emailBody = WriteRegistrationEmailBody(user);
 
-       // await _emailService.SendAsync(user.Email!, "Library - Verify your email", emailBody);
         _backgroundJob.Enqueue<IEmailService>(x => x.SendAsync(user.Email!, "Library - Verify your email", emailBody));
 
         return new AuthResponseDto
@@ -236,15 +224,6 @@ public class AuthService : IAuthService
     }
     public async Task<AuthResponseDto> LoginAsync(LoginDto dto)
     {
-        //var validationResult = await _loginValidator.ValidateAsync(dto);
-        //if (!validationResult.IsValid)
-        //{
-        //    return new AuthResponseDto
-        //    {
-        //        Message = "Invalid login credentials."
-        //    };
-        //}
-
         var user = await _userManager.FindByEmailAsync(dto.Email);
         if (user == null)
         {
@@ -313,15 +292,6 @@ public class AuthService : IAuthService
     }
     public async Task<AuthResponseDto> ResetPasswordAsync(ResetPasswordDto dto)
     {
-        //var validate = await _resetPasswordValidator.ValidateAsync(dto);
-        //if (!validate.IsValid)
-        //{
-        //    return new AuthResponseDto
-        //    {
-        //        Message = "Validation failed: " + string.Join(", ", validate.Errors.Select(e => e.ErrorMessage))
-        //    };
-        //}
-
         var user = await _userManager.FindByEmailAsync(dto.Email);
         if (user is null)
         {
@@ -432,7 +402,6 @@ public class AuthService : IAuthService
 
         var emailBody = WritePasswordResetEmailBody(user);
 
-        //await _emailService.SendAsync(user.Email!, "Library - Password Reset Code", emailBody);
         _backgroundJob.Enqueue<IEmailService>(x => x.SendAsync(user.Email!, "Library - Password Reset Code", emailBody));
 
         return new AuthResponseDto
@@ -586,7 +555,6 @@ public class AuthService : IAuthService
 
         var emailBody = WriteRegistrationEmailBody(staff);
 
-         // await _emailService.SendAsync(.Email!, "Library - Verify your email", emailBody);
         _backgroundJob.Enqueue<IEmailService>(x => x.SendAsync(staff.Email!, "Library - Verify your Email", emailBody));
 
         return new AuthResponseDto

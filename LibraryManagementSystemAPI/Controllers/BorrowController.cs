@@ -1,6 +1,7 @@
 using LibraryManagementSystem.Application.DTOs.BorrowDtos;
 using LibraryManagementSystem.Application.DTOs.Common;
 using LibraryManagementSystem.Application.Interfaces.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryManagementSystem.API.Controllers
@@ -16,7 +17,7 @@ namespace LibraryManagementSystem.API.Controllers
             this._borrowService = borrowService;
         }
 
-        //[Authorize(Roles = "Librarian,Staff")]
+        [Authorize(Roles = "Librarian,Staff")]
         [HttpPost("borrow")]
         public async Task<IActionResult> BorrowBook([FromBody] BorrowBookDto dto)
         {
@@ -30,7 +31,7 @@ namespace LibraryManagementSystem.API.Controllers
             return BadRequest(result);
         }
 
-        //[Authorize(Roles = "Librarian,Staff")]
+        [Authorize(Roles = "Librarian,Staff")]
         [HttpPost("{borrowId:guid}/return")]
         public async Task<IActionResult> ReturnBook([FromRoute] Guid borrowId)
         {

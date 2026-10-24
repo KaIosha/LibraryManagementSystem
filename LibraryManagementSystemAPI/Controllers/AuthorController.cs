@@ -17,7 +17,7 @@ namespace LibraryManagementSystem.API.Controllers
             _authorService = authorService;
         }
 
-        //[Authorize(Roles = "Librarian,Staff")]
+        [Authorize(Roles = "Librarian,Staff")]
         [HttpPost("create")]
         public async Task<IActionResult> CreateAuthor([FromBody] CreateAuthorDto dto)
         {
@@ -31,7 +31,7 @@ namespace LibraryManagementSystem.API.Controllers
             return BadRequest(result);
         }
 
-        //[Authorize(Roles = "Librarian,Staff")]
+        [Authorize(Roles = "Librarian,Staff")]
         [HttpPut("update")]
         public async Task<IActionResult> UpdateAuthor([FromBody] UpdateAuthorDto dto)
         {
@@ -45,7 +45,7 @@ namespace LibraryManagementSystem.API.Controllers
             return BadRequest(result);
         }
 
-        //[Authorize(Roles = "Librarian,Staff")]
+        [Authorize(Roles = "Librarian,Staff")]
         [HttpDelete("{authorId:guid}")]
         public async Task<IActionResult> DeleteAuthor([FromRoute] Guid authorId)
         {
@@ -58,7 +58,7 @@ namespace LibraryManagementSystem.API.Controllers
 
             return BadRequest(result);
         }
-        //[Authorize]
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> ViewAuthors([FromQuery] BaseQuery query)
         {
